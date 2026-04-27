@@ -23,6 +23,7 @@ class Product extends Controller
      */
     public function indexAction(): void
     {
+        $csrfToken = $this->getCsrfToken();
         $formData = [
             'name' => '',
             'description' => '',
@@ -38,6 +39,7 @@ class Product extends Controller
             ];
 
             try {
+                $this->validateCsrfToken($_POST['csrf_token'] ?? null);
                 $this->addProductValidation($formData, $_FILES['picture'] ?? null);
 
                 $payload = $formData;
@@ -61,6 +63,7 @@ class Product extends Controller
         View::renderTemplate('Product/Add.html', [
             'formData' => $formData,
             'formError' => $formError,
+            'csrfToken' => $csrfToken,
         ]);
     }
 
@@ -171,5 +174,27 @@ class Product extends Controller
             UPLOAD_ERR_NO_FILE => 'La photo est obligatoire',
             default => 'Une erreur est survenue lors de l upload de la photo',
         };
+    }
+
+    private function getCsrfToken(): string
+    {
+        if (!isset($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        return $_SESSION['csrf_token'];
+    }
+
+    private function validateCsrfToken(?string $submittedToken): void
+    {
+        $sessionToken = $_SESSION['csrf_token'] ?? null;
+
+        if (
+            $submittedToken === null
+            || !is_string($sessionToken)
+            || !hash_equals($sessionToken, $submittedToken)
+        ) {
+            throw new InvalidArgumentException('CSRF invalide.');
+        }
     }
 }
