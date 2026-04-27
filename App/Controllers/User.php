@@ -7,6 +7,7 @@ use App\Models\Articles;
 use App\Utility\Hash;
 use App\Utility\RegexEnum;
 use App\Utility\Session;
+use App\Validators\UserControllerValidator;
 use \Core\View;
 use Exception;
 use InvalidArgumentException;
@@ -139,106 +140,17 @@ class User extends \Core\Controller
 
     private function validateFormLogin(array $data): void
     {
-        $this->validateEmail($data['email'] ?? null);
-        $this->validatePassword($data['password'] ?? null);
+        UserControllerValidator::validateEmail($data['email'] ?? null);
+        UserControllerValidator::validatePassword($data['password'] ?? null);
     }
 
     private function validateRegisterForm(array $data): void
     {
-        $this->validateUsername($data['username'] ?? null);
-        $this->validateEmail($data['email'] ?? null);
-        $this->validatePassword($data['password'] ?? null);
-        $this->validatePasswordMatch($data['password'] ?? null, $data['password-check'] ?? null);
+        UserControllerValidator::validateUsername($data['username'] ?? null);
+        UserControllerValidator::validateEmail($data['email'] ?? null);
+        UserControllerValidator::validatePassword($data['password'] ?? null);
+        UserControllerValidator::validatePasswordMatch($data['password'] ?? null, $data['password-check'] ?? null);
     }
-
-    private function validateEmail(?string $email): void
-    {
-        $violations = Validation::createValidatorBuilder()
-            ->getValidator()
-            ->validate($email, [
-                new Assert\NotBlank(
-                    message: 'L email est obligatoire'
-                ),
-                new Assert\Regex(
-                    pattern: RegexEnum::EMAIL,
-                    message: 'L email n est pas valide'
-                ),
-                new Assert\Regex(
-                    pattern: '/^[^<>{}"\'`;]*$/',
-                    message: 'L email contient des caracteres non autorises'
-                )
-            ]);
-
-        if (count($violations) > 0) {
-            throw new InvalidArgumentException($violations[0]->getMessage());
-        }
-    }
-
-    private function validateUsername(?string $username): void
-    {
-        $violations = Validation::createValidatorBuilder()
-            ->getValidator()
-            ->validate($username, [
-                new Assert\NotBlank(
-                    message: 'Le nom d utilisateur est obligatoire'
-                ),
-                new Assert\Regex(
-                    pattern: '/^[\p{L}\p{M}\d _.-]+$/u',
-                    message: 'Le nom d utilisateur contient des caracteres non autorises'
-                ),
-                new Assert\Regex(
-                    pattern: '/^[^<>{}"\'`;]*$/',
-                    message: 'Le nom d utilisateur contient des caracteres non autorises'
-                )
-            ]);
-
-        if (count($violations) > 0) {
-            throw new InvalidArgumentException($violations[0]->getMessage());
-        }
-    }
-
-    private function validatePassword(?string $password): void
-    {
-        $violations = Validation::createValidatorBuilder()
-            ->getValidator()
-            ->validate($password, [
-                new Assert\NotBlank(
-                    message: 'Le mot de passe est obligatoire'
-                ),
-                new Assert\Regex(
-                    pattern: RegexEnum::PASSWORD,
-                    message: 'Le mot de passe doit avoir 9 caracteres min, 1 majuscule, 2 chiffres et 1 special (,;:.?&*)'
-                ),
-                new Assert\Regex(
-                    pattern: '/^[^<>{}"\'`;]*$/',
-                    message: 'Le mot de passe contient des caracteres non autorises'
-                )
-            ]);
-
-        if (count($violations) > 0) {
-            throw new InvalidArgumentException($violations[0]->getMessage());
-        }
-    }
-
-    private function validatePasswordMatch(?string $password, ?string $passwordCheck): void
-    {
-        $violations = Validation::createValidatorBuilder()
-            ->getValidator()
-            ->validate($passwordCheck, [
-                new Assert\NotBlank(
-                    message: 'La confirmation du mot de passe est obligatoire'
-                )
-            ]);
-
-        if (count($violations) > 0) {
-            throw new InvalidArgumentException($violations[0]->getMessage());
-        }
-
-        if ($password !== $passwordCheck) {
-            throw new InvalidArgumentException('Les mots de passe ne correspondent pas');
-        }
-    }
-
 
     /**
      * Logout: Delete cookie and session. Returns true if everything is okay,
