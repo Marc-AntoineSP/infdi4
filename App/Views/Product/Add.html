@@ -17,44 +17,71 @@
 
     <div class="container mt-30">
         <form action="" method="post" enctype="multipart/form-data">
+            {% if formError %}
+                <div class="alert alert-danger" role="alert">
+                    {{ formError }}
+                </div>
+            {% endif %}
             <div class="row">
                 <div class="col-lg-6">
                     <div class="u-form">
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="e1">Titre</label>
-                                    <input type="text" name="name" class="form-control" id="e1"
-                                           placeholder="Jeu de cartes (rare)">
+                                    <label for="product-name">Titre</label>
+                                    <input
+                                        type="text"
+                                        id="product-name"
+                                        name="name"
+                                        class="form-control"
+                                        placeholder="Jeu de cartes (rare)"
+                                        value="{{ formData.name|default('')|e }}"
+                                    >
                                 </div>
                             </div>
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="e2">Description</label>
-                                    <textarea class="form-control" name="description" id="e2" rows="3"></textarea>
+                                    <label for="product-description">Description</label>
+                                    <textarea
+                                        id="product-description"
+                                        name="description"
+                                        class="form-control"
+                                        rows="3"
+                                    >{{ formData.description|default('')|e }}</textarea>
                                 </div>
                             </div>
 
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="e2">Ville</label>
-                                    <input class="form-control cityAutoComplete" type="text" autocomplete="off"/>
+                                    <label for="product-city">Ville</label>
+                                    <input
+                                        type="text"
+                                        id="product-city"
+                                        name="id_city"
+                                        class="form-control cityAutoComplete"
+                                        autocomplete="off"
+                                        value="{{ formData.id_city|default('')|e }}"
+                                    >
                                 </div>
                             </div>
 
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label for="e3">Image</label>
-                                    <input type="file" class="form-control" name="picture" id="e3" rows="3"/>
+                                    <label for="product-picture">Image</label>
+                                    <input
+                                        type="file"
+                                        id="product-picture"
+                                        name="picture"
+                                        class="form-control"
+                                        accept="image/*"
+                                    >
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="u-area mt-small">
-                        <form action="#" method="post">
-                            <button name="submit" class="btn btn-primary u-btn">Valider</button>
-                        </form>
+                        <button type="submit" name="submit" class="btn btn-primary u-btn">Valider</button>
                     </div>
                     <div class="u-terms">
                         <p>En soumettant votre article vous acceptez les <a href="#">conditions générales</a> de Vide Grenier en
