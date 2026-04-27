@@ -49,7 +49,7 @@ class User extends Model {
     /**
      * ?
      * @access public
-     * @return string|boolean
+     * @return array
      * @throws Exception
      */
     public static function login() {

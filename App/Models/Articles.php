@@ -16,10 +16,11 @@ class Articles extends Model {
     /**
      * ?
      * @access public
-     * @return string|boolean
+     * @return array
      * @throws Exception
      */
-    public static function getAll($filter) {
+    public static function getAll($filter): array
+    {
         $db = static::getDB();
 
         $query = 'SELECT * FROM articles ';
@@ -28,7 +29,7 @@ class Articles extends Model {
             case 'views':
                 $query .= ' ORDER BY articles.views DESC';
                 break;
-            case 'data':
+            case 'date':
                 $query .= ' ORDER BY articles.published_date DESC';
                 break;
             case '':
@@ -43,7 +44,7 @@ class Articles extends Model {
     /**
      * ?
      * @access public
-     * @return string|boolean
+     * @return array
      * @throws Exception
      */
     public static function getOne($id) {

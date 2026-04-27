@@ -4,13 +4,13 @@ namespace App\Controllers;
 
 use App\Models\Articles;
 use App\Models\Cities;
-use \Core\View;
+use Core\Controller;
 use Exception;
 
 /**
  * API controller
  */
-class Api extends \Core\Controller
+class Api extends Controller
 {
 
     /**
@@ -18,14 +18,14 @@ class Api extends \Core\Controller
      *
      * @throws Exception
      */
-    public function ProductsAction()
+    public function ProductsAction(): void
     {
         $query = $_GET['sort'];
 
         $articles = Articles::getAll($query);
 
         header('Content-Type: application/json');
-        echo json_encode($articles);
+        echo json_encode($articles, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -33,11 +33,12 @@ class Api extends \Core\Controller
      *
      * @throws Exception
      */
-    public function CitiesAction(){
+    public function CitiesAction(): void
+    {
 
         $cities = Cities::search($_GET['query']);
 
         header('Content-Type: application/json');
-        echo json_encode($cities);
+        echo json_encode($cities, JSON_THROW_ON_ERROR);
     }
 }
