@@ -2,9 +2,9 @@
 
 namespace App\Utility;
 
-use LogicException;
+use InvalidArgumentException;
 use Random\RandomException;
-use RuntimeException;
+use UnexpectedValueException;
 
 /**
  * Hash:
@@ -22,8 +22,12 @@ class Hash {
     /**
      * Génère et retourne un salt
      */
-    public static function generateSalt($length): string
+    public static function generateSalt(int $length): string
     {
+        if ($length <= 0) {
+            throw new InvalidArgumentException('Salt length must be a positive integer.');
+        }
+
         $salt = "";
         $charset = getenv('SALT_CHARSET');
         if (($charset === false || $charset === '') && isset($_ENV['SALT_CHARSET'])) {
@@ -31,22 +35,26 @@ class Hash {
         }
 
         if ($charset === false || $charset === '') {
-            throw new RuntimeException(
-                'Missing required env var SALT_CHARSET. Start services with `make up` (uses .env.dev).'
+            throw new UnexpectedValueException(
+                'Missing required env var SALT_CHARSET in PHP environment.'
             );
         }
 
         $charsetLength = strlen($charset);
 
-        if ($charsetLength === 0) {
-            throw new RuntimeException('SALT_CHARSET must not be empty');
+        if ($charsetLength < 2) {
+            throw new UnexpectedValueException('SALT_CHARSET must contain at least 2 characters.');
         }
 
         for ($i = 0; $i < $length; $i++) {
             try {
                 $salt .= $charset[random_int(0, $charsetLength - 1)];
             } catch (RandomException $e) {
-                throw new LogicException("Unable to generate salt: " . $e->getMessage());
+                throw new UnexpectedValueException(
+                    'Unable to generate cryptographically secure salt.',
+                    0,
+                    $e
+                );
             }
         }
         return $salt;
@@ -57,7 +65,7 @@ class Hash {
      */
     public static function generateUnique(): string
     {
-        return(self::generate(uniqid(more_entropy: true)));
+        return self::generate(uniqid(more_entropy: true));
     }
 
 }

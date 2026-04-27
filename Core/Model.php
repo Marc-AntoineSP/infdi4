@@ -3,7 +3,7 @@
 namespace Core;
 
 use PDO;
-use RuntimeException;
+use UnexpectedValueException;
 
 /**
  * Base model
@@ -53,7 +53,7 @@ abstract class Model
             return $_ENV[$name];
         }
 
-        throw new RuntimeException(
+        throw new UnexpectedValueException(
             'Missing required env var ' . $name
         );
     }
