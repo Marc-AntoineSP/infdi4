@@ -5,6 +5,7 @@ LABEL authors="marca"
 WORKDIR /var/www/html
 
 RUN docker-php-ext-install pdo_mysql
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 FROM base AS dev
 
@@ -31,6 +32,9 @@ RUN groupadd --gid "${GID}" app \
     && chown -R app:app /var/www/html
 
 USER app
+
+COPY --chown=app:app composer.json composer-lock.json ./
+RUN composer install --no-interaction --prefer-dist --no-progress
 
 FROM base AS staging
 
