@@ -11,6 +11,7 @@ use App\Validators\UserControllerValidator;
 use \Core\View;
 use Exception;
 use InvalidArgumentException;
+use RuntimeException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
 
@@ -23,7 +24,7 @@ class User extends \Core\Controller
     /**
      * Affiche la page de login
      */
-    public function loginAction()
+    public function loginAction(): void //Ca a l'air OK.
     {
         $formError = null;
 
@@ -35,7 +36,6 @@ class User extends \Core\Controller
 
                 $this->login($f);
 
-                // Si login OK, redirige vers le compte
                 header('Location: /account');
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
@@ -61,6 +61,7 @@ class User extends \Core\Controller
                 $this->validateRegisterForm($f);
 
                 $this->register($f);
+                $this->login($f);
                 // TODO: Rappeler la fonction de login pour connecter l'utilisateur
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
@@ -109,18 +110,20 @@ class User extends \Core\Controller
         }
     }
 
-    private function login($data){
+    private function login($data): void
+    {
         try {
             if(!isset($data['email'])){
-                throw new Exception('TODO');
+                throw new RuntimeException('TODO');
             }
 
             $user = \App\Models\User::getByLogin($data['email']);
 
             if (Hash::generate($data['password'], $user['salt']) !== $user['password']) {
-                return false;
+                return;
             }
 
+            //Pour l'instant osef de ça. ----------
             // TODO: Create a remember me cookie if the user has selected the option
             // to remained logged in on the login form.
             // https://github.com/andrewdyer/php-mvc-register-login/blob/development/www/app/Model/UserLogin.php#L86
@@ -130,9 +133,10 @@ class User extends \Core\Controller
                 'username' => $user['username'],
             );
 
-            return true;
+            return;
 
         } catch (Exception $ex) {
+            //2 secondes.
             // TODO : Set flash if error
             /* Utility\Flash::danger($ex->getMessage());*/
         }
