@@ -50,7 +50,7 @@ class User extends \Core\Controller
     /**
      * Page de création de compte
      */
-    public function registerAction()
+    public function registerAction(): void //Fixed : Login + redirect.
     {
         $formError = null;
 
@@ -62,7 +62,8 @@ class User extends \Core\Controller
 
                 $this->register($f);
                 $this->login($f);
-                // TODO: Rappeler la fonction de login pour connecter l'utilisateur
+
+                header('Location: /account');
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
             }
@@ -88,7 +89,7 @@ class User extends \Core\Controller
     /*
      * Fonction privée pour enregister un utilisateur
      */
-    private function register($data)
+    private function register($data): void
     {
         try {
             // Generate a salt, which will be applied to the during the password
@@ -102,7 +103,7 @@ class User extends \Core\Controller
                 "salt" => $salt
             ]);
 
-            return $userID;
+            return;
 
         } catch (Exception $ex) {
             // TODO : Set flash if error : utiliser la fonction en dessous
