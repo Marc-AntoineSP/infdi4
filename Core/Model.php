@@ -16,7 +16,7 @@ abstract class Model
     /**
      * Get the PDO database connection
      *
-     * @return mixed
+     * @return PDO|null
      */
     protected static function getDB()
     {
@@ -31,7 +31,6 @@ abstract class Model
             $dsn = 'mysql:host=' . $host . ';dbname=' . $name . ';charset=utf8';
             $db = new PDO($dsn, $user, $password);
 
-            // Throw an Exception when an error occurs
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
 
