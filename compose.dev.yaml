@@ -12,11 +12,11 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      DB_HOST: dev
-      DB_NAME: dev
-      DB_USER: dev
-      DB_PASSWORD: dev
-      XDEBUG_MODE: debug,develop
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      XDEBUG_MODE: ${XDEBUG_MODE:-debug,develop}
     depends_on:
       - database
   nginx:
@@ -31,10 +31,10 @@ services:
   database:
     image: mariadb:11.4
     environment:
-      MARIADB_DATABASE: dev
-      MARIADB_USER: dev
-      MARIADB_PASSWORD: dev
-      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
       - ./sql/import.sql:/docker-entrypoint-initdb.d/01-import.sql:ro
