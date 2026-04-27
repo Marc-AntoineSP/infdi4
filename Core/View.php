@@ -2,6 +2,14 @@
 
 namespace Core;
 
+use RuntimeException;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
+use Twig\Extension\DebugExtension;
+use Twig\Loader\Filesystemloader;
+
 /**
  * View
  *
@@ -27,7 +35,7 @@ class View
         if (is_readable($file)) {
             require $file;
         } else {
-            throw new \Exception("$file not found");
+            throw new RuntimeException("$file not found");
         }
     }
 
@@ -44,12 +52,20 @@ class View
         static $twig = null;
 
         if ($twig === null) {
-            $loader = new \Twig\Loader\Filesystemloader(dirname(__DIR__) . '/App/Views');
-            $twig = new \Twig\Environment($loader, ['debug' => true,]);
-            $twig->addExtension(new \Twig\Extension\DebugExtension());
+            $loader = new Filesystemloader(dirname(__DIR__) . '/App/Views');
+            $twig = new Environment($loader, ['debug' => true,]);
+            $twig->addExtension(new DebugExtension());
         }
 
-        echo $twig->render($template, View::setDefaultVariables($args));
+        try {
+            echo $twig->render($template, self::setDefaultVariables($args));
+        } catch (LoaderError $e) {
+            throw new RuntimeException($e->getMessage());
+        } catch (RuntimeError $e) {
+            throw new RuntimeException($e->getMessage());
+        } catch (SyntaxError $e) {
+            throw new RuntimeException($e->getMessage());
+        }
     }
 
 
