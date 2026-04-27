@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Config;
 use App\Model\UserRegister;
 use App\Models\Articles;
 use App\Utility\Hash;
