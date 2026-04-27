@@ -20,7 +20,16 @@ class Home extends \Core\Controller
      */
     public function indexAction()
     {
+        $sort = $_GET['sort'] ?? '';
 
-        View::renderTemplate('Home/index.html', []);
+        if (!in_array($sort, ['', 'views', 'date'], true)) {
+            $sort = '';
+        }
+
+        $products = Articles::getAll($sort);
+        View::renderTemplate('Home/index.html', [
+            "products" => $products,
+            "sort" => $sort,
+        ]);
     }
 }
