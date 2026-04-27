@@ -8,8 +8,6 @@ use App\Utility\Hash;
 use App\Utility\Session;
 use \Core\View;
 use Exception;
-use http\Env\Request;
-use http\Exception\InvalidArgumentException;
 
 /**
  * User controller
