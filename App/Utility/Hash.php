@@ -25,7 +25,17 @@ class Hash {
     public static function generateSalt($length): string
     {
         $salt = "";
-        $charset = $_ENV['SALT_CHARSET'];
+        $charset = getenv('SALT_CHARSET');
+        if (($charset === false || $charset === '') && isset($_ENV['SALT_CHARSET'])) {
+            $charset = $_ENV['SALT_CHARSET'];
+        }
+
+        if ($charset === false || $charset === '') {
+            throw new RuntimeException(
+                'Missing required env var SALT_CHARSET. Start services with `make up` (uses .env.dev).'
+            );
+        }
+
         $charsetLength = strlen($charset);
 
         if ($charsetLength === 0) {

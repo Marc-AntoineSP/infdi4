@@ -2,7 +2,6 @@
 
 namespace Core;
 
-use App\Config;
 use ErrorException;
 use Exception;
 
@@ -47,7 +46,7 @@ class Error
         }
         http_response_code($code);
 
-        if (Config::SHOW_ERRORS) {
+        if (self::showErrors()) {
             echo "<h1>Fatal error</h1>";
             echo "<p>Uncaught exception: '" . get_class($exception) . "'</p>";
             echo "<p>Message: '" . $exception->getMessage() . "'</p>";
@@ -66,5 +65,25 @@ class Error
 
             View::renderTemplate("$code.html");
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private static function showErrors()
+    {
+        $value = getenv('SHOW_ERRORS');
+
+        if (($value === false || $value === '') && isset($_ENV['SHOW_ERRORS'])) {
+            $value = $_ENV['SHOW_ERRORS'];
+        }
+
+        if ($value === false || $value === '' || $value === null) {
+            return true;
+        }
+
+        $parsed = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        return $parsed === null ? true : $parsed;
     }
 }

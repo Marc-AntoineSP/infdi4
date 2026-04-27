@@ -3,7 +3,7 @@
 namespace Core;
 
 use PDO;
-use App\Config;
+use RuntimeException;
 
 /**
  * Base model
@@ -18,15 +18,15 @@ abstract class Model
      *
      * @return PDO|null
      */
-    protected static function getDB()
+    protected static function getDB(): ?PDO
     {
         static $db = null;
 
         if ($db === null) {
-            $host = getenv('DB_HOST') ?: Config::DB_HOST;
-            $name = getenv('DB_NAME') ?: Config::DB_NAME;
-            $user = getenv('DB_USER') ?: Config::DB_USER;
-            $password = getenv('DB_PASSWORD') ?: Config::DB_PASSWORD;
+            $host = self::getRequiredEnv('DB_HOST');
+            $name = self::getRequiredEnv('DB_NAME');
+            $user = self::getRequiredEnv('DB_USER');
+            $password = self::getRequiredEnv('DB_PASSWORD');
 
             $dsn = 'mysql:host=' . $host . ';dbname=' . $name . ';charset=utf8';
             $db = new PDO($dsn, $user, $password);
@@ -35,5 +35,26 @@ abstract class Model
         }
 
         return $db;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return string
+     */
+    private static function getRequiredEnv(string $name): string
+    {
+        $value = getenv($name);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+
+        if (isset($_ENV[$name]) && $_ENV[$name] !== '') {
+            return $_ENV[$name];
+        }
+
+        throw new RuntimeException(
+            'Missing required env var ' . $name
+        );
     }
 }
