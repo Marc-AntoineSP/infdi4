@@ -25,6 +25,11 @@
                 </div>
                 <div class="l-form">
                     <form method="post" action="">
+                        {% if formError %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ formError }}
+                            </div>
+                        {% endif %}
                         <div class="form-group">
                             <label for="username">Nom d'utilisateur</label>
                             <input type="text" class="form-control" id="username" name="username"

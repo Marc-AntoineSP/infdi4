@@ -5,9 +5,13 @@ namespace App\Controllers;
 use App\Model\UserRegister;
 use App\Models\Articles;
 use App\Utility\Hash;
+use App\Utility\RegexEnum;
 use App\Utility\Session;
 use \Core\View;
 use Exception;
+use InvalidArgumentException;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
 
 /**
  * User controller
@@ -20,18 +24,26 @@ class User extends \Core\Controller
      */
     public function loginAction()
     {
+        $formError = null;
+
         if(isset($_POST['submit'])){
             $f = $_POST;
 
-            // TODO: Validation
+            try {
+                $this->validateFormLogin($f);
 
-            $this->login($f);
+                $this->login($f);
 
-            // Si login OK, redirige vers le compte
-            header('Location: /account');
+                // Si login OK, redirige vers le compte
+                header('Location: /account');
+            } catch (InvalidArgumentException $e) {
+                $formError = $e->getMessage();
+            }
         }
 
-        View::renderTemplate('User/login.html');
+        View::renderTemplate('User/login.html', [
+            'formError' => $formError
+        ]);
     }
 
     /**
@@ -39,20 +51,24 @@ class User extends \Core\Controller
      */
     public function registerAction()
     {
+        $formError = null;
+
         if(isset($_POST['submit'])){
             $f = $_POST;
 
-            if($f['password'] !== $f['password-check']){
-                // TODO: Gestion d'erreur côté utilisateur
+            try {
+                $this->validateRegisterForm($f);
+
+                $this->register($f);
+                // TODO: Rappeler la fonction de login pour connecter l'utilisateur
+            } catch (InvalidArgumentException $e) {
+                $formError = $e->getMessage();
             }
-
-            // validation
-
-            $this->register($f);
-            // TODO: Rappeler la fonction de login pour connecter l'utilisateur
         }
 
-        View::renderTemplate('User/register.html');
+        View::renderTemplate('User/register.html', [
+            'formError' => $formError
+        ]);
     }
 
     /**
@@ -118,6 +134,108 @@ class User extends \Core\Controller
         } catch (Exception $ex) {
             // TODO : Set flash if error
             /* Utility\Flash::danger($ex->getMessage());*/
+        }
+    }
+
+    private function validateFormLogin(array $data): void
+    {
+        $this->validateEmail($data['email'] ?? null);
+        $this->validatePassword($data['password'] ?? null);
+    }
+
+    private function validateRegisterForm(array $data): void
+    {
+        $this->validateUsername($data['username'] ?? null);
+        $this->validateEmail($data['email'] ?? null);
+        $this->validatePassword($data['password'] ?? null);
+        $this->validatePasswordMatch($data['password'] ?? null, $data['password-check'] ?? null);
+    }
+
+    private function validateEmail(?string $email): void
+    {
+        $violations = Validation::createValidatorBuilder()
+            ->getValidator()
+            ->validate($email, [
+                new Assert\NotBlank(
+                    message: 'L email est obligatoire'
+                ),
+                new Assert\Regex(
+                    pattern: RegexEnum::EMAIL,
+                    message: 'L email n est pas valide'
+                ),
+                new Assert\Regex(
+                    pattern: '/^[^<>{}"\'`;]*$/',
+                    message: 'L email contient des caracteres non autorises'
+                )
+            ]);
+
+        if (count($violations) > 0) {
+            throw new InvalidArgumentException($violations[0]->getMessage());
+        }
+    }
+
+    private function validateUsername(?string $username): void
+    {
+        $violations = Validation::createValidatorBuilder()
+            ->getValidator()
+            ->validate($username, [
+                new Assert\NotBlank(
+                    message: 'Le nom d utilisateur est obligatoire'
+                ),
+                new Assert\Regex(
+                    pattern: '/^[\p{L}\p{M}\d _.-]+$/u',
+                    message: 'Le nom d utilisateur contient des caracteres non autorises'
+                ),
+                new Assert\Regex(
+                    pattern: '/^[^<>{}"\'`;]*$/',
+                    message: 'Le nom d utilisateur contient des caracteres non autorises'
+                )
+            ]);
+
+        if (count($violations) > 0) {
+            throw new InvalidArgumentException($violations[0]->getMessage());
+        }
+    }
+
+    private function validatePassword(?string $password): void
+    {
+        $violations = Validation::createValidatorBuilder()
+            ->getValidator()
+            ->validate($password, [
+                new Assert\NotBlank(
+                    message: 'Le mot de passe est obligatoire'
+                ),
+                new Assert\Regex(
+                    pattern: RegexEnum::PASSWORD,
+                    message: 'Le mot de passe doit avoir 9 caracteres min, 1 majuscule, 2 chiffres et 1 special (,;:.?&*)'
+                ),
+                new Assert\Regex(
+                    pattern: '/^[^<>{}"\'`;]*$/',
+                    message: 'Le mot de passe contient des caracteres non autorises'
+                )
+            ]);
+
+        if (count($violations) > 0) {
+            throw new InvalidArgumentException($violations[0]->getMessage());
+        }
+    }
+
+    private function validatePasswordMatch(?string $password, ?string $passwordCheck): void
+    {
+        $violations = Validation::createValidatorBuilder()
+            ->getValidator()
+            ->validate($passwordCheck, [
+                new Assert\NotBlank(
+                    message: 'La confirmation du mot de passe est obligatoire'
+                )
+            ]);
+
+        if (count($violations) > 0) {
+            throw new InvalidArgumentException($violations[0]->getMessage());
+        }
+
+        if ($password !== $passwordCheck) {
+            throw new InvalidArgumentException('Les mots de passe ne correspondent pas');
         }
     }
 
