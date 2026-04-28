@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Articles;
 use App\Utility\ApplicationEnum;
+use App\Utility\ErrorMessageEnum;
 use App\Utility\Hash;
 use App\Validators\UserControllerValidator;
 use Core\Controller;
@@ -46,8 +47,8 @@ class User extends Controller
                 $this->login($f);
 
                 if (!isset($_SESSION['user']['id'])) {
-                    $formError = 'Your credentials are invalid';
-                    $this->addWarningFlash('Your credentials are invalid');
+                    $formError = ErrorMessageEnum::INVALID_CREDENTIALS;
+                    $this->addWarningFlash(ErrorMessageEnum::INVALID_CREDENTIALS);
                 } else {
                     $this->addSuccessFlash("You've succesfully been logged in");
                     header(ApplicationEnum::HEADER_LOCATION . $this->consumeRedirectAfterLogin());
@@ -55,10 +56,10 @@ class User extends Controller
                 }
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
-                $this->addWarningFlash('Your credentials are invalid');
+                $this->addWarningFlash(ErrorMessageEnum::INVALID_CREDENTIALS);
             } catch (Exception) {
-                $formError = 'Your credentials are invalid';
-                $this->addWarningFlash('Your credentials are invalid');
+                $formError = ErrorMessageEnum::INVALID_CREDENTIALS;
+                $this->addWarningFlash(ErrorMessageEnum::INVALID_CREDENTIALS);
             }
         }
 
