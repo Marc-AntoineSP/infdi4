@@ -18,7 +18,7 @@ class Api extends Controller
      *
      * @throws Exception
      */
-    public function ProductsAction(): void
+    public function productsAction(): void
     {
         $query = $_GET['sort'];
 
@@ -33,7 +33,7 @@ class Api extends Controller
      *
      * @throws Exception
      */
-    public function CitiesAction(): void
+    public function citiesAction(): void
     {
 
         $cities = Cities::search($_GET['query']);
