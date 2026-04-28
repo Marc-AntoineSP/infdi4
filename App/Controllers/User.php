@@ -10,10 +10,11 @@ use Core\Controller;
 use \Core\View;
 use Exception;
 use InvalidArgumentException;
+use JetBrains\PhpStorm\NoReturn;
 use LogicException;
-use RuntimeException;
 use App\Models\User as UserModel;
 use App\Models\UserToken as UserTokenModel;
+use Random\RandomException;
 
 /**
  * User controller
@@ -55,7 +56,7 @@ class User extends Controller
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
                 $this->addWarningFlash('Your credentials are invalid');
-            } catch (Exception $e) {
+            } catch (Exception) {
                 $formError = 'Your credentials are invalid';
                 $this->addWarningFlash('Your credentials are invalid');
             }
@@ -94,13 +95,17 @@ class User extends Controller
                     exit;
                 }
             } catch (InvalidArgumentException $e) {
+                $this->addWarningFlash("Une erreur est survenue lors de l'enregistrement");
                 $formError = $e->getMessage();
+            } catch (Exception) {
+                $this->addDangerFlash("Une erreur technique est survenue lors de l'enregistrement");
+                $formError = "Impossible d'enregistrer l'utilisateur";
             }
         }
 
-        View::renderTemplate('User/register.html', [
+        View::renderTemplate('User/register.html', $this->withSonner([
             'formError' => $formError
-        ]);
+        ]));
     }
 
     /**
@@ -110,8 +115,8 @@ class User extends Controller
     {
         try {
             $articles = Articles::getByUser($_SESSION['user']['id']);
-        } catch (Exception $e) {
-            //TODO: Add flash après.
+        } catch (Exception) {
+            $this->addDangerFlash("Aucun articles sur votre compte");
             $articles = [];
         }
 
@@ -137,9 +142,8 @@ class User extends Controller
 
             return;
 
-        } catch (Exception $ex) {
-            // TODO : Set flash if error : utiliser la fonction en dessous
-            /* Utility\Flash::danger($ex->getMessage());*/
+        } catch (Exception) {
+            $this->addDangerFlash("Impossible d'enregistrer l'utilisateur");
         }
     }
 
@@ -165,10 +169,8 @@ class User extends Controller
             if (isset($data['remember_me'])) {
                 $this->issueRememberMeCookie((int) $user['id']);
             }
-        } catch (Exception $ex) {
-            //2 secondes.
-            // TODO : Set flash if error
-            /* Utility\Flash::danger($ex->getMessage());*/
+        } catch (Exception) {
+            $this->addDangerFlash("Invalid credentials");
         }
     }
 
@@ -179,22 +181,30 @@ class User extends Controller
             return;
         }
 
-        $userToken = UserTokenModel::getByToken($token);
-        if ($userToken === null) {
-            $this->clearRememberMeCookie();
-            return;
-        }
+        try {
+            $userToken = UserTokenModel::getByToken($token);
+            if ($userToken === null) {
+                $this->clearRememberMeCookie();
+                $this->addWarningFlash('No session found for this cookie.');
+                return;
+            }
 
-        $user = UserModel::getOneById((int) $userToken['user_id']);
-        if (!is_array($user) || !isset($user['id'])) {
+            $user = UserModel::getOneById((int) $userToken['user_id']);
+            if (!is_array($user) || !isset($user['id'])) {
+                UserTokenModel::invalidateByToken($token);
+                $this->clearRememberMeCookie();
+                $this->addWarningFlash('No user found for this cookie.');
+                return;
+            }
+
+            $this->completeLogin($user);
             UserTokenModel::invalidateByToken($token);
+            $this->issueRememberMeCookie((int) $user['id']);
+            $this->addSuccessFlash("Session refreshed");
+        } catch (Exception) {
             $this->clearRememberMeCookie();
-            return;
+            $this->addDangerFlash('Unable to restore your previous session. Please log in again.');
         }
-
-        $this->completeLogin($user);
-        UserTokenModel::invalidateByToken($token);
-        $this->issueRememberMeCookie((int) $user['id']);
     }
 
     private function consumeRedirectAfterLogin(): string
@@ -218,6 +228,9 @@ class User extends Controller
         ];
     }
 
+    /**
+     * @throws RandomException
+     */
     private function issueRememberMeCookie(int $userId): void
     {
         $userToken = UserTokenModel::createUserToken($userId);
@@ -266,10 +279,12 @@ class User extends Controller
      * Logout: Delete cookie and session. Returns true if everything is okay,
      * otherwise turns false.
      * @access public
-     * @return boolean
+     * @return void
      * @since 1.0.2
      */
-    public function logoutAction() {
+    #[NoReturn]
+    public function logoutAction(): void
+    {
 
         $_SESSION = array();
 
