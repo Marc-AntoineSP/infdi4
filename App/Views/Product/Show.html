@@ -39,9 +39,31 @@
                         <p>{{article.description}}</p>
                     </div>
                     <div class="u-area mt-small">
-
-                    <a name="submit" href="mailto:{{article.email}}" class="btn btn-primary u-btn">Contacter {{article
-                        .username}}</a>
+                        {% if contactError %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ contactError }}
+                            </div>
+                        {% endif %}
+                        {% if contactSuccess %}
+                            <div class="alert alert-success" role="alert">
+                                {{ contactSuccess }}
+                            </div>
+                        {% endif %}
+                        <form action="/product/send-contact-message" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrfToken|e }}">
+                            <input type="hidden" name="article_id" value="{{ articleId|e }}">
+                            <div class="form-group">
+                                <label for="contact-message">Message</label>
+                                <textarea
+                                    id="contact-message"
+                                    name="message"
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="Votre message..."
+                                >{{ contactMessage|default('')|e }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary u-btn">Envoyer à {{ article.username }}</button>
+                        </form>
 
                     </div>
                 </div>

@@ -74,6 +74,12 @@ class Product extends Controller
     public function showAction(): void
     {
         $id = $this->route_params['id'];
+        $csrfToken = $this->getCsrfToken();
+        $contactError = $_SESSION['contact_error'] ?? null;
+        $contactSuccess = $_SESSION['contact_success'] ?? null;
+        $contactMessage = $_SESSION['contact_message'] ?? '';
+
+        unset($_SESSION['contact_error'], $_SESSION['contact_success'], $_SESSION['contact_message']);
 
         try {
             Articles::addOneView($id);
@@ -86,6 +92,11 @@ class Product extends Controller
         View::renderTemplate('Product/Show.html', [
             'article' => $article[0],
             'suggestions' => $suggestions,
+            'articleId' => $id,
+            'csrfToken' => $csrfToken,
+            'contactError' => $contactError,
+            'contactSuccess' => $contactSuccess,
+            'contactMessage' => $contactMessage,
         ]);
     }
 
@@ -196,5 +207,49 @@ class Product extends Controller
         ) {
             throw new InvalidArgumentException('CSRF invalide.');
         }
+    }
+
+    public function sendContactMessageAction(): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            header('Location: /');
+            return;
+        }
+
+        $articleId = (int)($_POST['article_id'] ?? 0);
+
+        if ($articleId <= 0) {
+            header('Location: /');
+            return;
+        }
+
+        $message = trim((string)($_POST['message'] ?? ''));
+        $_SESSION['contact_message'] = $message;
+
+        try {
+            $this->validateCsrfToken($_POST['csrf_token'] ?? null);
+
+            if ($message === '') {
+                throw new InvalidArgumentException('Le message est obligatoire');
+            }
+
+            if (strlen($message) > 2000) {
+                throw new InvalidArgumentException('Le message est trop long');
+            }
+
+            $article = Articles::getOne($articleId);
+            if (empty($article)) {
+                throw new InvalidArgumentException('Article introuvable');
+            }
+
+            unset($_SESSION['contact_message']);
+            $_SESSION['contact_success'] = 'Votre message a bien ete transmis.';
+        } catch (InvalidArgumentException $e) {
+            $_SESSION['contact_error'] = $e->getMessage();
+        } catch (Exception $e) {
+            $_SESSION['contact_error'] = 'Une erreur est survenue lors de l envoi du message';
+        }
+
+        header('Location: /product/' . $articleId);
     }
 }
