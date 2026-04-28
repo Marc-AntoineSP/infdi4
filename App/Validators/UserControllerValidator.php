@@ -24,7 +24,7 @@ class UserControllerValidator
                     message: 'L email n est pas valide'
                 ),
                 new Assert\Regex(
-                    pattern: '/^[^<>{}"\'`;]*$/',
+                    pattern: RegexEnum::PASSWORD_UNAUTHORIZED,
                     message: 'L email contient des caracteres non autorises'
                 )
             ]);
@@ -43,11 +43,11 @@ class UserControllerValidator
                     message: 'Le nom d utilisateur est obligatoire'
                 ),
                 new Assert\Regex(
-                    pattern: '/^[\p{L}\p{M}\d _.-]+$/u',
+                    pattern: RegexEnum::USERNAME_UNAUTHORIZED,
                     message: 'Le nom d utilisateur contient des caracteres non autorises'
                 ),
                 new Assert\Regex(
-                    pattern: '/^[^<>{}"\'`;]*$/',
+                    pattern: RegexEnum::PASSWORD_UNAUTHORIZED,
                     message: 'Le nom d utilisateur contient des caracteres non autorises'
                 )
             ]);
@@ -89,7 +89,7 @@ class UserControllerValidator
                     message: 'Le mot de passe doit avoir 9 caracteres min, 1 majuscule, 2 chiffres et 1 special (,;:.?&*)'
                 ),
                 new Assert\Regex(
-                    pattern: '/^[^<>{}"\'`;]*$/',
+                    pattern: RegexEnum::PASSWORD_UNAUTHORIZED,
                     message: 'Le mot de passe contient des caracteres non autorises'
                 )
             ]);
