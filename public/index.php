@@ -45,6 +45,11 @@ try {
 } catch(Exception $e){
     switch($e->getMessage()){
         case 'You must be logged in':
+            $wanted_url = $_SERVER['REQUEST_URI'] ?? '/';
+            if(!in_array($wanted_url, ['/login', '/register'], true))
+            {
+                $_SESSION['redirect_after_login'] = $wanted_url;
+            }
             header('Location: /login');
             break;
     }
