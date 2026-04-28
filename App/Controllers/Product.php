@@ -116,7 +116,7 @@ class Product extends Controller
             ),
         ]);
 
-        if (count($violations) > 0) {
+        if ($violations->count() > 0) {
             throw new InvalidArgumentException($violations[0]->getMessage());
         }
     }
@@ -161,7 +161,7 @@ class Product extends Controller
             allowMissingFields: false,
         ));
 
-        if (count($violations) > 0) {
+        if ($violations->count() > 0) {
             throw new InvalidArgumentException($violations[0]->getMessage());
         }
     }
