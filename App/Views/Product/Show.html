@@ -10,7 +10,9 @@
             <div class="col-lg-8 col-xs-12 col-sm-12">
                 <div class="preview-article">
                     <img
-                            src="{{ ('/storage/' ~ article.picture) }}"/>
+                            src="{{ ('/storage/' ~ article.picture) }}"
+                            alt="{{ article.name }}"
+                    />
 
                 </div>
                 <h1><a href="#">{{article.name}}</a></h1>
