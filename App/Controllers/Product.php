@@ -3,8 +3,10 @@
 namespace App\Controllers;
 
 use App\Models\Articles;
+use App\Utility\ApplicationEnum;
 use App\Utility\RegexEnum;
 use App\Utility\Upload;
+use App\Validators\ProductControllerValidator;
 use Core\Controller;
 use Core\View;
 use Exception;
@@ -49,7 +51,7 @@ class Product extends Controller
                 $pictureName = Upload::uploadFile($_FILES['picture'], $id);
                 Articles::attachPicture($id, $pictureName);
 
-                header('Location: /product/' . $id);
+                header(ApplicationEnum::HEADER_LOCATION.'/product/' . $id);
                 return;
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
@@ -212,14 +214,14 @@ class Product extends Controller
     public function sendContactMessageAction(): void
     {
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-            header('Location: /');
+            header(ApplicationEnum::HEADER_LOCATION.'/');
             return;
         }
 
         $articleId = (int)($_POST['article_id'] ?? 0);
 
         if ($articleId <= 0) {
-            header('Location: /');
+            header(ApplicationEnum::HEADER_LOCATION.'/');
             return;
         }
 
@@ -229,13 +231,7 @@ class Product extends Controller
         try {
             $this->validateCsrfToken($_POST['csrf_token'] ?? null);
 
-            if ($message === '') {
-                throw new InvalidArgumentException('Le message est obligatoire');
-            }
-
-            if (strlen($message) > 2000) {
-                throw new InvalidArgumentException('Le message est trop long');
-            }
+            ProductControllerValidator::validateMessage($message);
 
             $article = Articles::getOne($articleId);
             if (empty($article)) {
@@ -250,6 +246,6 @@ class Product extends Controller
             $_SESSION['contact_error'] = 'Une erreur est survenue lors de l envoi du message';
         }
 
-        header('Location: /product/' . $articleId);
+        header(ApplicationEnum::HEADER_LOCATION.'/product/' . $articleId);
     }
 }
