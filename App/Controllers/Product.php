@@ -9,11 +9,12 @@ use App\Utility\Upload;
 use App\Validators\ProductControllerValidator;
 use Core\Controller;
 use Core\View;
-use Exception;
 use InvalidArgumentException;
 use Random\RandomException;
+use RuntimeException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
+use Throwable;
 
 /**
  * Product controller
@@ -26,13 +27,20 @@ class Product extends Controller
      */
     public function indexAction(): void
     {
-        $csrfToken = $this->getCsrfToken();
         $formData = [
             'name' => '',
             'description' => '',
             'id_city' => '',
         ];
         $formError = null;
+        $csrfToken = '';
+
+        try {
+            $csrfToken = $this->getCsrfToken();
+        } catch (Throwable $e) {
+            $formError = 'Une erreur est survenue lors de la generation du token';
+            $this->addDangerFlash($formError);
+        }
 
         if (isset($_POST['submit'])) {
             $formData = [
@@ -52,22 +60,25 @@ class Product extends Controller
                 $pictureName = Upload::uploadFile($_FILES['picture'], $id);
                 Articles::attachPicture($id, $pictureName);
 
+                $this->addSuccessFlash('Produit enregistre avec succes');
                 header(ApplicationEnum::HEADER_LOCATION.'/product/' . $id);
                 return;
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
-            } catch (Exception $e) {
+                $this->addWarningFlash($formError);
+            } catch (Throwable $e) {
                 $formError = $e->getMessage() !== ''
                     ? $e->getMessage()
                     : 'Une erreur est survenue lors de l enregistrement du produit';
+                $this->addDangerFlash($formError);
             }
         }
 
-        View::renderTemplate('Product/Add.html', [
+        View::renderTemplate('Product/Add.html', $this->withSonner([
             'formData' => $formData,
             'formError' => $formError,
             'csrfToken' => $csrfToken,
-        ]);
+        ]));
     }
 
     /**
@@ -76,31 +87,56 @@ class Product extends Controller
      */
     public function showAction(): void
     {
-        $id = $this->route_params['id'];
-        $csrfToken = $this->getCsrfToken();
+        $id = (int) ($this->route_params['id'] ?? 0);
+        $csrfToken = '';
         $contactError = $_SESSION['contact_error'] ?? null;
         $contactSuccess = $_SESSION['contact_success'] ?? null;
         $contactMessage = $_SESSION['contact_message'] ?? '';
 
         unset($_SESSION['contact_error'], $_SESSION['contact_success'], $_SESSION['contact_message']);
 
+        if ($id <= 0) {
+            $this->addWarningFlash('Article introuvable');
+            View::renderTemplate('404.html', $this->withSonner());
+            return;
+        }
+
+        try {
+            $csrfToken = $this->getCsrfToken();
+        } catch (Throwable $e) {
+            $this->addDangerFlash('Une erreur est survenue lors de la generation du token');
+        }
+
+        $suggestions = [];
+        $article = null;
+
         try {
             Articles::addOneView($id);
             $suggestions = Articles::getSuggest();
-            $article = Articles::getOne($id);
-        } catch (Exception $e) {
-            var_dump($e);
+            $articleRows = Articles::getOne($id);
+            if (!isset($articleRows[0]) || !is_array($articleRows[0])) {
+                throw new InvalidArgumentException('Article introuvable');
+            }
+            $article = $articleRows[0];
+        } catch (InvalidArgumentException $e) {
+            $this->addWarningFlash($e->getMessage());
+            View::renderTemplate('404.html', $this->withSonner());
+            return;
+        } catch (Throwable $e) {
+            $this->addDangerFlash('Une erreur est survenue lors du chargement du produit');
+            View::renderTemplate('500.html', $this->withSonner());
+            return;
         }
 
-        View::renderTemplate('Product/Show.html', [
-            'article' => $article[0],
+        View::renderTemplate('Product/Show.html', $this->withSonner([
+            'article' => $article,
             'suggestions' => $suggestions,
             'articleId' => $id,
             'csrfToken' => $csrfToken,
             'contactError' => $contactError,
             'contactSuccess' => $contactSuccess,
             'contactMessage' => $contactMessage,
-        ]);
+        ]));
     }
 
     private function addProductValidation(array $data, ?array $picture): void
@@ -196,7 +232,7 @@ class Product extends Controller
             try {
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             } catch (RandomException $e) {
-                throw new Exception('Une erreur est survenue lors de la generation du token');
+                throw new RuntimeException('Une erreur est survenue lors de la generation du token', 0, $e);
             }
         }
 
@@ -219,6 +255,7 @@ class Product extends Controller
     public function sendContactMessageAction(): void
     {
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            $this->addWarningFlash('Methode non autorisee pour cette action');
             header(ApplicationEnum::HEADER_LOCATION.'/');
             return;
         }
@@ -226,6 +263,7 @@ class Product extends Controller
         $articleId = (int)($_POST['article_id'] ?? 0);
 
         if ($articleId <= 0) {
+            $this->addWarningFlash('Article introuvable');
             header(ApplicationEnum::HEADER_LOCATION.'/');
             return;
         }
@@ -245,10 +283,13 @@ class Product extends Controller
 
             unset($_SESSION['contact_message']);
             $_SESSION['contact_success'] = 'Votre message a bien ete transmis.';
+            $this->addSuccessFlash('Votre message a bien ete transmis.');
         } catch (InvalidArgumentException $e) {
             $_SESSION['contact_error'] = $e->getMessage();
-        } catch (Exception $e) {
+            $this->addWarningFlash($_SESSION['contact_error']);
+        } catch (Throwable $e) {
             $_SESSION['contact_error'] = 'Une erreur est survenue lors de l envoi du message';
+            $this->addDangerFlash($_SESSION['contact_error']);
         }
 
         header(ApplicationEnum::HEADER_LOCATION.'/product/' . $articleId);
