@@ -19,7 +19,7 @@ Ce Readme.md est à destination des futurs repreneurs du site-web Vide Grenier e
 4. Lancez la commande `composer install` pour les dépendances
 
 ## Mise en place du projet front-end
-1. Lancez la commande `npm install` pour installer node-sass
+1. Lancez la commande `npm install` pour installer Dart Sass
 2. Lancez la commande `npm run watch` pour compiler les fichiers SCSS
 
 ## Routing
