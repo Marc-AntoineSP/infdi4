@@ -10,7 +10,7 @@
   .cb-header {
     padding: $space-smmm 0;
     color: $c-light;
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       padding: 12px 0;
     }
     .list-inline {
@@ -21,7 +21,7 @@
   }
   .cb-content {
     margin-bottom: $space-sms;
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       margin-bottom: 12px;
     }
   }
@@ -58,7 +58,7 @@
 .avatars {
   [class^='col-'] {
     &:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(4)) {
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         display: none;
       }
     }
@@ -71,7 +71,7 @@
     width: 100%;
     border-radius: 50%;
     overflow: hidden;
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       margin: 0 auto;
     }
     img {
@@ -198,7 +198,7 @@
     font-size: $fs-defs;
     color: $c-light;
     padding-top: 5px;
-    @media only screen and(min-width: 768px) {
+    @media only screen and (min-width: 768px) {
       padding-bottom: 30px;
     }
     .v-percent {
@@ -233,10 +233,10 @@
   }
   .h-article {
     [class^='col-']:last-child {
-      @media only screen and(min-width: 768px) {
+      @media only screen and (min-width: 768px) {
         margin-top: 25px;
       }
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         padding-left: 0;
       }
     }
@@ -248,7 +248,7 @@
 
 .chanels-row {
   [class^='col-']:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)) {
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       display: none;
     }
   }
@@ -329,7 +329,7 @@
     color: $c-caption;
     font-weight: 500;
     padding-top: $space-sms;
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       padding-top: 14px;
     }
   }
@@ -377,14 +377,14 @@
     align-items: center;
     justify-content: center;
     @include display-flex();
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       min-width: 60px;
       height: 50px;
       padding: 0 12px;
     }
     &:not(:last-child) {
       margin-left: 30px;
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         margin-left: 12px;
       }
     }
@@ -400,11 +400,11 @@
   ul {
     justify-content: space-between;
     @include display-flex();
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       flex-wrap: wrap;
     }
     li {
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         display: none;
       }
     }
@@ -464,13 +464,13 @@
         width: 100%;
       }
       .v-views {
-        @media only screen and(min-width: 768px) {
+        @media only screen and (min-width: 768px) {
           padding-bottom: 30px;
         }
       }
       .last-row {
         .v-views {
-          @media only screen and(min-width: 768px) {
+          @media only screen and (min-width: 768px) {
             padding-bottom: 30px;
           }
         }
@@ -527,17 +527,17 @@
 
 .single-v-footer {
   & > *:not(.single-v-footer-switch) {
-    @media only screen and(min-width: 768px) {
+    @media only screen and (min-width: 768px) {
       display: block !important;
     }
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       display: none;
     }
   }
   &-switch {
     margin-bottom: 30px;
     @include display-flex();
-    @media only screen and(min-width: 768px) {
+    @media only screen and (min-width: 768px) {
       display: none;
     }
     & > a {

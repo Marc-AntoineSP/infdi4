@@ -28,7 +28,7 @@
       color: $c-caption;
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         background-color: #fbfdfe;
       }
     }
@@ -42,7 +42,7 @@
         font-weight: 500;
       }
       .btn {
-        @media only screen and(max-width: 767px) {
+        @media only screen and (max-width: 767px) {
           border-radius: 30px;
           padding-top: 16px;
           padding-bottom: 12px;
@@ -52,7 +52,7 @@
   }
   .checkbox {
     font-weight: normal;
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       margin-bottom: 30px;
     }
     p {

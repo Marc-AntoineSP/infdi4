@@ -10,12 +10,12 @@ footer {
       display: flex;
       align-items: center;
 
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         flex-wrap: wrap;
         @include display-flex();
       }
       [class^='col-']:nth-child(3) {
-        @media only screen and(max-width: 767px) {
+        @media only screen and (max-width: 767px) {
           order: 1;
         }
       }
@@ -27,7 +27,7 @@ footer {
     padding: 0;
     li {
       a {
-        @media only screen and(max-width: 767px) {
+        @media only screen and (max-width: 767px) {
           color: #2e2e2e !important;
         }
       }
@@ -36,7 +36,7 @@ footer {
 
   .f-copy {
     color: $c-light;
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       margin-bottom: 10px;
     }
     a {
@@ -52,7 +52,7 @@ footer {
     font-size: $fs-lg;
     color: $c-icon;
     padding-left: 15px;
-    @media only screen and(min-width: 768px) {
+    @media only screen and (min-width: 768px) {
       padding-top: 35px;
     }
     a {
@@ -65,14 +65,14 @@ footer {
   }
 
   .f-lang {
-    @media only screen and(min-width: 768px) {
+    @media only screen and (min-width: 768px) {
       padding-top: 30px;
     }
     .btn-default {
       color: $c-default;
       background-color: transparent;
       border: none;
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         margin-bottom: 6px;
         background-color: #eceff0 !important;
         border-radius: 30px;
@@ -81,7 +81,7 @@ footer {
     }
   }
   .f-last-line {
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       justify-content: center;
       align-items: center;
       @include display-flex();

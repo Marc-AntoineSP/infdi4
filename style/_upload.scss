@@ -70,7 +70,7 @@
     padding-bottom: 30px;
     margin-bottom: 30px;
     border-bottom: solid 1px $c-divider;
-    @media only screen and(max-width: 767px) {
+    @media only screen and (max-width: 767px) {
       padding-bottom: 20px;
       margin-bottom: 20px;
     }
@@ -82,7 +82,7 @@
       padding-top: 25px;
       padding-bottom: 25px;
       color: $c-default;
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         padding-top: 15px;
         padding-bottom: 15px;
       }
@@ -92,7 +92,7 @@
       border-radius: 3px;
       width: 100%;
       height: 113px;
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         height: 200px;
         margin-bottom: 15px;
       }
@@ -111,7 +111,7 @@
         position: absolute;
         top: 2px;
         right: 21px;
-        @media only screen and(max-width: 767px) {
+        @media only screen and (max-width: 767px) {
           right: 0;
           top: -36px;
         }
@@ -126,7 +126,7 @@
         background-color: $c-divider;
         -webkit-box-shadow: none;
         box-shadow: none;
-        @media only screen and(max-width: 767px) {
+        @media only screen and (max-width: 767px) {
           width: 100%;
         }
         .progress-bar {
@@ -145,7 +145,7 @@
       font-weight: normal;
     }
     .form-group {
-      @media only screen and(max-width: 767px) {
+      @media only screen and (max-width: 767px) {
         margin-bottom: 20px;
       }
     }
