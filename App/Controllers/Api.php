@@ -20,7 +20,7 @@ class Api extends Controller
      */
     public function productsAction(): void
     {
-        $query = $_GET['sort'];
+        $query = isset($_GET['sort']) && is_string($_GET['sort']) ? $_GET['sort'] : '';
 
         $articles = Articles::getAll($query);
 

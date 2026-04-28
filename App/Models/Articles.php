@@ -19,11 +19,17 @@ class Articles extends Model {
      * @return array
      * @throws Exception
      */
-    public static function getAll($filter): array
+    public static function getAll(string $filter, string $searchQuery = ''): array
     {
         $db = static::getDB();
 
-        $query = 'SELECT * FROM articles ';
+        $query = 'SELECT * FROM articles';
+        $params = [];
+
+        if ($searchQuery !== '') {
+            $query .= ' WHERE articles.name LIKE :search';
+            $params[':search'] = '%' . $searchQuery . '%';
+        }
 
         switch ($filter){
             case 'views':
@@ -36,7 +42,8 @@ class Articles extends Model {
                 break;
         }
 
-        $stmt = $db->query($query);
+        $stmt = $db->prepare($query);
+        $stmt->execute($params);
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }

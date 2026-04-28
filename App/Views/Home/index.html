@@ -28,10 +28,10 @@
                                         Filtrer par <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a href="?sort=views" class="{{ sort == 'views' ? 'color-active' : '' }}"><i
+                                        <li><a href="?sort=views{% if searchQuery is not empty %}&q={{ searchQuery|url_encode }}{% endif %}" class="{{ sort == 'views' ? 'color-active' : '' }}"><i
                                                 class="cv cvicon-cv-calender"></i>
                                             Popularité</a></li>
-                                        <li><a href="?sort=date" class="{{ sort == 'date' ? 'color-active' : '' }}"><i
+                                        <li><a href="?sort=date{% if searchQuery is not empty %}&q={{ searchQuery|url_encode }}{% endif %}" class="{{ sort == 'date' ? 'color-active' : '' }}"><i
                                                 class="cv cvicon-cv-calender"></i>
                                             Récent</a></li>
                                     </ul>

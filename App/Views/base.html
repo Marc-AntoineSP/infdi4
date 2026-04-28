@@ -44,16 +44,18 @@
                     </div>
 
                     <div class="col-lg-6 col-sm-8 col-xs-3">
-                        <!--<form action="search.html" method="post">
+                        <form action="/" method="get">
                             <div class="topsearch">
                                 <i class="cv cvicon-cv-cancel topsearch-close"></i>
                                 <div class="input-group">
                                     <span class="input-group-addon" id="sizing-addon2"><i class="fa fa-search"></i></span>
                                     <input type="text" class="form-control" placeholder="Rechercher..."
+                                           name="q"
+                                           value="{{ searchQuery|default('')|e }}"
                                            aria-describedby="sizing-addon2">
                                 </div>
                             </div>
-                        </form>-->
+                        </form>
                     </div>
 
                     {% if user is not null %}
@@ -133,8 +135,7 @@
             <div class="row">
                 <div class="container padding-def">
                     <div class="col-lg-1  col-sm-2 col-xs-12 footer-logo">
-                        <!--<a class="navbar-brand" href="index.html"><img src="images/logo.png" alt="Project name" class="logo" /></a>-->
-                        <a class="navbar-brand" href="index.html">
+                        <a class="navbar-brand" href="/">
                             <img src="/images/logo.png" alt="Vide Grenier en ligne" class="logo" />
                             <span>Vide Grenier en ligne</span>
                         </a>
