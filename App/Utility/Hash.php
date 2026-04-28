@@ -16,7 +16,7 @@ class Hash {
      */
     public static function generate($string, $salt = ""): string
     {
-        return(hash("sha256", $string . $salt));
+        return hash("sha256", $string . $salt);
     }
 
     /**
