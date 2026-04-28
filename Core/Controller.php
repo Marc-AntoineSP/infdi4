@@ -2,6 +2,8 @@
 
 namespace Core;
 
+use AllowDynamicProperties;
+use InvalidArgumentException;
 use RuntimeException;
 
 /**
@@ -9,42 +11,43 @@ use RuntimeException;
  *
  * PHP version 7.0
  */
+#[AllowDynamicProperties]
 abstract class Controller
 {
-    private const FLASH_SESSION_KEY = 'flashes';
+    private const string FLASH_SESSION_KEY = 'flashes';
 
     /**
      * Parameters from the matched route
      * @var array
      */
-    protected $route_params = [];
+    protected array $routeParams = [];
 
     /**
      * Class constructor
      *
-     * @param array $route_params  Parameters from the route
+     * @param array<int, string> $routeParams  Parameters from the route
      *
      * @return void
      */
-    public function __construct($route_params)
+    public function __construct(array $routeParams)
     {
-        $this->route_params = $route_params;
+        $this->route_params = $routeParams;
     }
 
     /**
      * @param string $name  Method name
-     * @param array $args Arguments passed to the method
+     * @param array<int, string> $args Arguments passed to the method
      *
      * @return void
      */
-    public function __call($name, $args)
+    public function __call(string $name, array $args)
     {
         $method = $name . 'Action';
 
         if (method_exists($this, $method)) {
             call_user_func_array([$this, $method], $args);
         } else {
-            throw new RuntimeException("Method $method not found in controller " . get_class($this));
+            throw new InvalidArgumentException("Method $method not found in controller " . get_class($this));
         }
     }
 
@@ -53,7 +56,7 @@ abstract class Controller
      *
      * @return void
      */
-    protected function before()
+    protected function before(): void
     {
     }
 
@@ -62,7 +65,7 @@ abstract class Controller
      *
      * @return void
      */
-    protected function after()
+    protected function after(): void
     {
     }
 
