@@ -29,7 +29,7 @@ class UserControllerValidator
                 )
             ]);
 
-        if (count($violations) > 0) {
+        if ($violations->count() > 0) {
             throw new InvalidArgumentException($violations[0]->getMessage());
         }
     }
@@ -52,7 +52,7 @@ class UserControllerValidator
                 )
             ]);
 
-        if (count($violations) > 0) {
+        if ($violations->count() > 0) {
             throw new InvalidArgumentException($violations[0]->getMessage());
         }
     }
@@ -67,7 +67,7 @@ class UserControllerValidator
                 )
             ]);
 
-        if (count($violations) > 0) {
+        if ($violations->count() > 0) {
             throw new InvalidArgumentException($violations[0]->getMessage());
         }
 
@@ -94,7 +94,7 @@ class UserControllerValidator
                 )
             ]);
 
-        if (count($violations) > 0) {
+        if ($violations->count() > 0) {
             throw new InvalidArgumentException($violations[0]->getMessage());
         }
     }
