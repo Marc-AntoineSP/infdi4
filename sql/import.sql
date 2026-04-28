@@ -90,6 +90,19 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `salt`, `is_admin`) 
 (1, 'John Doe', 'john.doe@gmail.com', '', '', 0),
 (3, 'Azerty', 'admin@admin.fr', 'e27f4a0e6addcaacbfc1322fbc8543fb3f696b228af9e08ac9595cdd70ce0134', ':d>BK\\ta]3-0=jM<g1=:=!\'<ykeP_@M;', 0);
 
+CREATE TABLE `user_tokens` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_user_tokens_token` (`token`),
+  KEY `idx_user_tokens_expires_at` (`expires_at`),
+  KEY `idx_user_tokens_user_id` (`user_id`),
+  CONSTRAINT `fk_user_tokens_user_id`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- --------------------------------------------------------
 
 --
