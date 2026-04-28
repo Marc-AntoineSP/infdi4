@@ -11,7 +11,7 @@
 {% endif %}
 
 {% if flashes is not empty %}
-    <div class="sonner-stack" aria-live="polite" aria-atomic="true">
+    <div class="sonner-stack" aria-live="polite" aria-atomic="true" style="top:20px !important; left:50% !important; right:auto !important; transform:translateX(-50%) !important;">
         {% for flash in flashes %}
             {% set flashType = flash.type in ['success', 'warning', 'danger'] ? flash.type : 'success' %}
             <div class="sonner sonner--{{ flashType }}" role="{{ flashType == 'danger' ? 'alert' : 'status' }}">
