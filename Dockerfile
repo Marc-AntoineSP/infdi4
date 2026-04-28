@@ -33,7 +33,7 @@ RUN groupadd --gid "${GID}" app \
 
 USER app
 
-COPY --chown=app:app composer.json composer-lock.json ./
+COPY --chown=app:app composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --no-progress
 
 FROM base AS staging
