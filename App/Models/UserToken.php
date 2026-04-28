@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utility\ApplicationEnum;
 use Core\Model;
 use PDO;
 use Random\RandomException;
@@ -26,9 +27,9 @@ class UserToken extends Model {
                    '
         );
 
-        $stmt->bindParam(':token', $hashedToken);
-        $stmt->bindParam(':expires_at', $expires_at);
-        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(ApplicationEnum::TOKEN_PARAM, $hashedToken);
+        $stmt->bindParam(ApplicationEnum::EXPIRES_AT_PARAM, $expires_at);
+        $stmt->bindParam(ApplicationEnum::USER_ID_PARAM, $userId);
 
         $stmt->execute();
 
@@ -48,7 +49,7 @@ class UserToken extends Model {
 
         $tokenToHash = hash('sha256', $token);
 
-        $stmt->bindParam(':token', $tokenToHash);
+        $stmt->bindParam(ApplicationEnum::TOKEN_PARAM, $tokenToHash);
 
         $stmt->execute();
 
@@ -65,13 +66,13 @@ class UserToken extends Model {
         $db = static::getDB();
         $dbToken = hash('sha256', $token);
         $stmt = $db->prepare('DELETE FROM user_tokens WHERE token = :token');
-        $stmt->bindParam(':token', $dbToken);
+        $stmt->bindParam(ApplicationEnum::TOKEN_PARAM, $dbToken);
         $stmt->execute();
     }
 
     public static function cleanup(): void
     {
         $db = static::getDB();
-        $stmt = $db->exec('DELETE FROM user_tokens WHERE expires_at < NOW()');
+        $db->exec('DELETE FROM user_tokens WHERE expires_at < NOW()');
     }
 }
