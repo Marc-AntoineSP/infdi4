@@ -1,8 +1,3 @@
-{# props type string #}
-{# props sonner_message string #}
-
-{% props sonner_message = "", type = "success" %}
-
 {% set flashes = sonnerFlashes|default([]) %}
 
 {% if sonner_message is defined and sonner_message is not empty %}

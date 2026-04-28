@@ -45,19 +45,25 @@ class User extends Controller
                 $this->login($f);
 
                 if (!isset($_SESSION['user']['id'])) {
-                    $formError = 'Identifiants invalides';
+                    $formError = 'Your credentials are invalid';
+                    $this->addWarningFlash('Your credentials are invalid');
                 } else {
+                    $this->addSuccessFlash("You've succesfully been logged in");
                     header(ApplicationEnum::HEADER_LOCATION . $this->consumeRedirectAfterLogin());
                     exit;
                 }
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
+                $this->addWarningFlash('Your credentials are invalid');
+            } catch (Exception $e) {
+                $formError = 'Your credentials are invalid';
+                $this->addWarningFlash('Your credentials are invalid');
             }
         }
 
-        View::renderTemplate('User/login.html', [
+        View::renderTemplate('User/login.html', $this->withSonner([
             'formError' => $formError
-        ]);
+        ]));
     }
 
     /**
@@ -109,9 +115,9 @@ class User extends Controller
             $articles = [];
         }
 
-        View::renderTemplate('User/account.html', [
+        View::renderTemplate('User/account.html', $this->withSonner([
             'articles' => $articles
-        ]);
+        ]));
     }
 
     /*
