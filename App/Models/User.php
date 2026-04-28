@@ -55,12 +55,20 @@ class User extends Model {
     public static function login() {
         $db = static::getDB();
 
-        $stmt = $db->prepare('SELECT * FROM articles WHERE articles.id = ? LIMIT 1');
+        $stmt = $db->prepare('SELECT * FROM users WHERE users.id = ? LIMIT 1');
 
         $stmt->execute([$id]);
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public static function getOneById($id): array
+    {
+        $db = static::getDB();
 
+        $stmt = $db->prepare('SELECT * FROM users WHERE users.id = ? LIMIT 1');
+        $stmt->execute([$id]);
+
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
 }
