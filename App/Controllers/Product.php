@@ -4,12 +4,14 @@ namespace App\Controllers;
 
 use App\Models\Articles;
 use App\Utility\ApplicationEnum;
+use App\Utility\ErrorMessageEnum;
 use App\Utility\RegexEnum;
 use App\Utility\Upload;
 use App\Validators\ProductControllerValidator;
 use Core\Controller;
 use Core\View;
 use InvalidArgumentException;
+use LogicException;
 use Random\RandomException;
 use RuntimeException;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -38,7 +40,7 @@ class Product extends Controller
         try {
             $csrfToken = $this->getCsrfToken();
         } catch (Throwable $e) {
-            $formError = 'Une erreur est survenue lors de la generation du token';
+            $formError = ErrorMessageEnum::CSRF_GENERATION_ERROR;
             $this->addDangerFlash($formError);
         }
 
@@ -69,7 +71,7 @@ class Product extends Controller
             } catch (Throwable $e) {
                 $formError = $e->getMessage() !== ''
                     ? $e->getMessage()
-                    : 'Une erreur est survenue lors de l enregistrement du produit';
+                    : ErrorMessageEnum::PRODUCT_UPLOAD_ERROR;
                 $this->addDangerFlash($formError);
             }
         }
@@ -96,7 +98,7 @@ class Product extends Controller
         unset($_SESSION['contact_error'], $_SESSION['contact_success'], $_SESSION['contact_message']);
 
         if ($id <= 0) {
-            $this->addWarningFlash('Article introuvable');
+            $this->addWarningFlash(ErrorMessageEnum::ARTICLE_NOT_FOUND);
             View::renderTemplate('404.html', $this->withSonner());
             return;
         }
@@ -104,7 +106,7 @@ class Product extends Controller
         try {
             $csrfToken = $this->getCsrfToken();
         } catch (Throwable $e) {
-            $this->addDangerFlash('Une erreur est survenue lors de la generation du token');
+            $this->addDangerFlash(ErrorMessageEnum::CSRF_GENERATION_ERROR);
         }
 
         $suggestions = [];
@@ -115,7 +117,7 @@ class Product extends Controller
             $suggestions = Articles::getSuggest();
             $articleRows = Articles::getOne($id);
             if (!isset($articleRows[0]) || !is_array($articleRows[0])) {
-                throw new InvalidArgumentException('Article introuvable');
+                throw new InvalidArgumentException(ErrorMessageEnum::ARTICLE_NOT_FOUND);
             }
             $article = $articleRows[0];
         } catch (InvalidArgumentException $e) {
@@ -123,7 +125,7 @@ class Product extends Controller
             View::renderTemplate('404.html', $this->withSonner());
             return;
         } catch (Throwable $e) {
-            $this->addDangerFlash('Une erreur est survenue lors du chargement du produit');
+            $this->addDangerFlash(ErrorMessageEnum::PRODUCT_LOAD_ERROR);
             View::renderTemplate('500.html', $this->withSonner());
             return;
         }
@@ -187,16 +189,16 @@ class Product extends Controller
         $violations = $validator->validate($data, new Assert\Collection(
             fields: [
                 'name' => [
-                    new Assert\NotBlank(message: 'Le nom du fichier est obligatoire'),
+                    new Assert\NotBlank(message: ErrorMessageEnum::PICTURE_NOT_BLANK),
                     new Assert\Type(type: 'string'),
                 ],
                 'tmp_name' => [
-                    new Assert\NotBlank(message: 'Le fichier image est introuvable'),
+                    new Assert\NotBlank(message: ErrorMessageEnum::PICTURE_UPLOAD_ERROR),
                     new Assert\File(
                         maxSize: '4M',
                         mimeTypes: ['image/jpeg', 'image/png'],
-                        maxSizeMessage: 'La photo ne doit pas depasser 4 Mo',
-                        mimeTypesMessage: 'La photo doit etre au format JPG ou PNG'
+                        maxSizeMessage: ErrorMessageEnum::PICTURE_TOO_LARGE,
+                        mimeTypesMessage: ErrorMessageEnum::PICTURE_MIME_TYPE_ERROR,
                     ),
                 ],
                 'size' => [
@@ -219,10 +221,10 @@ class Product extends Controller
     private function getPictureUploadErrorMessage(int $uploadError): string
     {
         return match ($uploadError) {
-            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'La photo ne doit pas depasser 4 Mo',
-            UPLOAD_ERR_PARTIAL => 'La photo n a pas ete telechargee completement',
-            UPLOAD_ERR_NO_FILE => 'La photo est obligatoire',
-            default => 'Une erreur est survenue lors de l upload de la photo',
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => ErrorMessageEnum::PICTURE_TOO_LARGE,
+            UPLOAD_ERR_PARTIAL => ErrorMessageEnum::PICTURE_UPLOAD_ERROR,
+            UPLOAD_ERR_NO_FILE => ErrorMessageEnum::PICTURE_NOT_BLANK,
+            default => ErrorMessageEnum::DEFAULT_PICTURE_UPLOAD_ERROR,
         };
     }
 
@@ -232,7 +234,7 @@ class Product extends Controller
             try {
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             } catch (RandomException $e) {
-                throw new RuntimeException('Une erreur est survenue lors de la generation du token', 0, $e);
+                throw new LogicException(ErrorMessageEnum::CSRF_GENERATION_ERROR, 0, $e);
             }
         }
 
@@ -248,14 +250,14 @@ class Product extends Controller
             || !is_string($sessionToken)
             || !hash_equals($sessionToken, $submittedToken)
         ) {
-            throw new InvalidArgumentException('CSRF invalide.');
+            throw new InvalidArgumentException(ErrorMessageEnum::INVALID_CSRF_TOKEN);
         }
     }
 
     public function sendContactMessageAction(): void
     {
         if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-            $this->addWarningFlash('Methode non autorisee pour cette action');
+            $this->addWarningFlash(ErrorMessageEnum::REQUEST_METHOD_INVALID);
             header(ApplicationEnum::HEADER_LOCATION.'/');
             return;
         }
@@ -263,7 +265,7 @@ class Product extends Controller
         $articleId = (int)($_POST['article_id'] ?? 0);
 
         if ($articleId <= 0) {
-            $this->addWarningFlash('Article introuvable');
+            $this->addWarningFlash(ErrorMessageEnum::ARTICLE_NOT_FOUND);
             header(ApplicationEnum::HEADER_LOCATION.'/');
             return;
         }
@@ -278,7 +280,7 @@ class Product extends Controller
 
             $article = Articles::getOne($articleId);
             if (empty($article)) {
-                throw new InvalidArgumentException('Article introuvable');
+                throw new InvalidArgumentException(ErrorMessageEnum::ARTICLE_NOT_FOUND);
             }
 
             unset($_SESSION['contact_message']);
@@ -288,7 +290,7 @@ class Product extends Controller
             $_SESSION['contact_error'] = $e->getMessage();
             $this->addWarningFlash($_SESSION['contact_error']);
         } catch (Throwable $e) {
-            $_SESSION['contact_error'] = 'Une erreur est survenue lors de l envoi du message';
+            $_SESSION['contact_error'] = ErrorMessageEnum::MESSAGE_SEND_ERROR;
             $this->addDangerFlash($_SESSION['contact_error']);
         }
 
