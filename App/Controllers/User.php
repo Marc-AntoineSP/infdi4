@@ -3,12 +3,14 @@
 namespace App\Controllers;
 
 use App\Models\Articles;
+use App\Utility\ApplicationEnum;
 use App\Utility\Hash;
 use App\Validators\UserControllerValidator;
 use Core\Controller;
 use \Core\View;
 use Exception;
 use InvalidArgumentException;
+use LogicException;
 use RuntimeException;
 use App\Models\User as UserModel;
 use App\Models\UserToken as UserTokenModel;
@@ -18,7 +20,6 @@ use App\Models\UserToken as UserTokenModel;
  */
 class User extends Controller
 {
-
     /**
      * Affiche la page de login
      */
@@ -29,7 +30,7 @@ class User extends Controller
         }
 
         if (isset($_SESSION['user']['id'])) {
-            header('Location: ' . $this->consumeRedirectAfterLogin());
+            header(ApplicationEnum::HEADER_LOCATION . $this->consumeRedirectAfterLogin());
             exit;
         }
 
@@ -46,7 +47,7 @@ class User extends Controller
                 if (!isset($_SESSION['user']['id'])) {
                     $formError = 'Identifiants invalides';
                 } else {
-                    header('Location: ' . $this->consumeRedirectAfterLogin());
+                    header(ApplicationEnum::HEADER_LOCATION . $this->consumeRedirectAfterLogin());
                     exit;
                 }
             } catch (InvalidArgumentException $e) {
@@ -65,7 +66,7 @@ class User extends Controller
     public function registerAction(): void //Fixed: Login + redirect.
     {
         if (isset($_SESSION['user']['id'])) {
-            header('Location: ' . $this->consumeRedirectAfterLogin());
+            header(ApplicationEnum::HEADER_LOCATION . $this->consumeRedirectAfterLogin());
             exit;
         }
 
@@ -83,7 +84,7 @@ class User extends Controller
                 if (!isset($_SESSION['user']['id'])) {
                     $formError = 'Impossible de connecter le nouvel utilisateur';
                 } else {
-                    header('Location: ' . $this->consumeRedirectAfterLogin());
+                    header(ApplicationEnum::HEADER_LOCATION . $this->consumeRedirectAfterLogin());
                     exit;
                 }
             } catch (InvalidArgumentException $e) {
@@ -140,7 +141,7 @@ class User extends Controller
     {
         try {
             if(!isset($data['email'], $data['password'])){
-                throw new RuntimeException('TODO');
+                throw new InvalidArgumentException('Email et mot de passe requis');
             }
 
             $user = UserModel::getByLogin($data['email']);
@@ -225,7 +226,7 @@ class User extends Controller
         ]);
 
         if (!$ok) {
-            throw new RuntimeException('Failed to send rememberme cookie');
+            throw new LogicException('Failed to send rememberme cookie');
         }
     }
 
