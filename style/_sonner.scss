@@ -1,0 +1,76 @@
+/*
+* Sonner (CSS-only)
+*/
+
+.sonner-stack {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(420px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.sonner {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  padding: 12px 14px;
+  color: #fff;
+  font-family: "Hind", sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: sonner-lifecycle 5s ease-in-out forwards;
+}
+
+.sonner--success {
+  background: #16845a;
+  border-color: #116b48;
+}
+
+.sonner--warning {
+  background: #b46700;
+  border-color: #945401;
+}
+
+.sonner--danger {
+  background: #bb2f2f;
+  border-color: #992626;
+}
+
+.sonner__message {
+  display: block;
+}
+
+@keyframes sonner-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  8% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  82% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .sonner-stack {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+}

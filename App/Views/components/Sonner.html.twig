@@ -1,0 +1,27 @@
+{# props type string #}
+{# props sonner_message string #}
+
+{% props sonner_message = "", type = "success" %}
+
+{% set flashes = sonnerFlashes|default([]) %}
+
+{% if sonner_message is defined and sonner_message is not empty %}
+    {% set inlineType = 'success' %}
+    {% if sonner_danger|default(false) %}
+        {% set inlineType = 'danger' %}
+    {% elseif sonner_warning|default(false) %}
+        {% set inlineType = 'warning' %}
+    {% endif %}
+    {% set flashes = flashes|merge([{ type: inlineType, message: sonner_message }]) %}
+{% endif %}
+
+{% if flashes is not empty %}
+    <div class="sonner-stack" aria-live="polite" aria-atomic="true">
+        {% for flash in flashes %}
+            {% set flashType = flash.type in ['success', 'warning', 'danger'] ? flash.type : 'success' %}
+            <div class="sonner sonner--{{ flashType }}" role="{{ flashType == 'danger' ? 'alert' : 'status' }}">
+                <span class="sonner__message">{{ flash.message }}</span>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

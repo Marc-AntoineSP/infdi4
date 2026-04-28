@@ -1,0 +1,10 @@
+{% if sonnerFlashes is defined and sonnerFlashes is not empty %}
+    <div class="sonner-stack" aria-live="polite" aria-atomic="true">
+        {% for flash in sonnerFlashes %}
+            {% set flashType = flash.type in ['success', 'warning', 'danger'] ? flash.type : 'success' %}
+            <div class="sonner sonner--{{ flashType }}" role="{{ flashType == 'danger' ? 'alert' : 'status' }}">
+                <span class="sonner__message">{{ flash.message }}</span>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
