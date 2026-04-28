@@ -264,13 +264,6 @@ class User extends Controller
      */
     public function logoutAction() {
 
-        /*
-        if (isset($_COOKIE[$cookie])){
-            // TODO: Delete the users remember me cookie if one has been stored.
-            // https://github.com/andrewdyer/php-mvc-register-login/blob/development/www/app/Model/UserLogin.php#L148
-        }*/
-        // Destroy all data registered to the session.
-
         $_SESSION = array();
 
         if (ini_get("session.use_cookies")) {
@@ -282,6 +275,7 @@ class User extends Controller
         }
 
         session_destroy();
+        $this->clearRememberMeCookie();
 
         header ("Location: /");
         exit;
