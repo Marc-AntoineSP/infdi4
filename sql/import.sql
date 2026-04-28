@@ -98,9 +98,7 @@ CREATE TABLE `user_tokens` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_user_tokens_token` (`token`),
   KEY `idx_user_tokens_expires_at` (`expires_at`),
-  KEY `idx_user_tokens_user_id` (`user_id`),
-  CONSTRAINT `fk_user_tokens_user_id`
-    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+  KEY `idx_user_tokens_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -37076,3 +37074,9 @@ ALTER TABLE `villes_france`
 --
 ALTER TABLE `articles`
   ADD CONSTRAINT `articles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `user_tokens`
+--
+ALTER TABLE `user_tokens`
+  ADD CONSTRAINT `fk_user_tokens_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
