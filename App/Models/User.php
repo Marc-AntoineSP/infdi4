@@ -45,23 +45,6 @@ class User extends Model {
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
-
-    /**
-     * ?
-     * @access public
-     * @return array
-     * @throws Exception
-     */
-    public static function login() {
-        $db = static::getDB();
-
-        $stmt = $db->prepare('SELECT * FROM users WHERE users.id = ? LIMIT 1');
-
-        $stmt->execute([$id]);
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
     public static function getOneById($id): array
     {
         $db = static::getDB();
