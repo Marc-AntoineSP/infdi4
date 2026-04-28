@@ -13,7 +13,7 @@ ARG UID=1000
 ARG GID=1000
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git unzip procps \
+    && apt-get install -y --no-install-recommends git unzip procps nodejs npm \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pecl install xdebug \
