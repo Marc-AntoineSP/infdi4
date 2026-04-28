@@ -2,23 +2,21 @@
 
 namespace App\Controllers;
 
-use App\Model\UserRegister;
 use App\Models\Articles;
 use App\Utility\Hash;
-use App\Utility\RegexEnum;
-use App\Utility\Session;
 use App\Validators\UserControllerValidator;
+use Core\Controller;
 use \Core\View;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validation;
+use App\Models\User as UserModel;
+use App\Models\UserToken as UserTokenModel;
 
 /**
  * User controller
  */
-class User extends \Core\Controller
+class User extends Controller
 {
 
     /**
@@ -26,6 +24,15 @@ class User extends \Core\Controller
      */
     public function loginAction(): void //Ca a l'air OK.
     {
+        if (!isset($_SESSION['user']['id']) && isset($_COOKIE['remember_me'])) {
+            $this->refreshSessionIfRememberMeValid();
+        }
+
+        if (isset($_SESSION['user']['id'])) {
+            header('Location: ' . $this->consumeRedirectAfterLogin());
+            exit;
+        }
+
         $formError = null;
 
         if(isset($_POST['submit'])){
@@ -36,7 +43,12 @@ class User extends \Core\Controller
 
                 $this->login($f);
 
-                header('Location: /account');
+                if (!isset($_SESSION['user']['id'])) {
+                    $formError = 'Identifiants invalides';
+                } else {
+                    header('Location: ' . $this->consumeRedirectAfterLogin());
+                    exit;
+                }
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
             }
@@ -50,8 +62,13 @@ class User extends \Core\Controller
     /**
      * Page de création de compte
      */
-    public function registerAction(): void //Fixed : Login + redirect.
+    public function registerAction(): void //Fixed: Login + redirect.
     {
+        if (isset($_SESSION['user']['id'])) {
+            header('Location: ' . $this->consumeRedirectAfterLogin());
+            exit;
+        }
+
         $formError = null;
 
         if(isset($_POST['submit'])){
@@ -63,7 +80,12 @@ class User extends \Core\Controller
                 $this->register($f);
                 $this->login($f);
 
-                header('Location: /account');
+                if (!isset($_SESSION['user']['id'])) {
+                    $formError = 'Impossible de connecter le nouvel utilisateur';
+                } else {
+                    header('Location: ' . $this->consumeRedirectAfterLogin());
+                    exit;
+                }
             } catch (InvalidArgumentException $e) {
                 $formError = $e->getMessage();
             }
@@ -77,9 +99,14 @@ class User extends \Core\Controller
     /**
      * Affiche la page du compte
      */
-    public function accountAction()
+    public function accountAction(): void
     {
-        $articles = Articles::getByUser($_SESSION['user']['id']);
+        try {
+            $articles = Articles::getByUser($_SESSION['user']['id']);
+        } catch (Exception $e) {
+            //TODO: Add flash après.
+            $articles = [];
+        }
 
         View::renderTemplate('User/account.html', [
             'articles' => $articles
@@ -92,11 +119,9 @@ class User extends \Core\Controller
     private function register($data): void
     {
         try {
-            // Generate a salt, which will be applied to the during the password
-            // hashing process.
             $salt = Hash::generateSalt(32);
 
-            $userID = \App\Models\User::createUser([
+            UserModel::createUser([
                 "email" => $data['email'],
                 "username" => $data['username'],
                 "password" => Hash::generate($data['password'], $salt),
@@ -111,36 +136,109 @@ class User extends \Core\Controller
         }
     }
 
-    private function login($data): void
+    private function login($data): void //Créer le cookie de rememberme
     {
         try {
-            if(!isset($data['email'])){
+            if(!isset($data['email'], $data['password'])){
                 throw new RuntimeException('TODO');
             }
 
-            $user = \App\Models\User::getByLogin($data['email']);
+            $user = UserModel::getByLogin($data['email']);
+
+            if (!is_array($user)) {
+                return;
+            }
 
             if (Hash::generate($data['password'], $user['salt']) !== $user['password']) {
                 return;
             }
 
-            //Pour l'instant osef de ça. ----------
-            // TODO: Create a remember me cookie if the user has selected the option
-            // to remained logged in on the login form.
-            // https://github.com/andrewdyer/php-mvc-register-login/blob/development/www/app/Model/UserLogin.php#L86
+            $this->completeLogin($user);
 
-            $_SESSION['user'] = array(
-                'id' => $user['id'],
-                'username' => $user['username'],
-            );
-
-            return;
-
+            if (isset($data['remember_me'])) {
+                $this->issueRememberMeCookie((int) $user['id']);
+            }
         } catch (Exception $ex) {
             //2 secondes.
             // TODO : Set flash if error
             /* Utility\Flash::danger($ex->getMessage());*/
         }
+    }
+
+    private function refreshSessionIfRememberMeValid(): void
+    {
+        $token = $_COOKIE['remember_me'] ?? null;
+        if (!is_string($token) || $token === '') {
+            return;
+        }
+
+        $userToken = UserTokenModel::getByToken($token);
+        if ($userToken === null) {
+            $this->clearRememberMeCookie();
+            return;
+        }
+
+        $user = UserModel::getOneById((int) $userToken['user_id']);
+        if (!is_array($user) || !isset($user['id'])) {
+            UserTokenModel::invalidateByToken($token);
+            $this->clearRememberMeCookie();
+            return;
+        }
+
+        $this->completeLogin($user);
+        UserTokenModel::invalidateByToken($token);
+        $this->issueRememberMeCookie((int) $user['id']);
+    }
+
+    private function consumeRedirectAfterLogin(): string
+    {
+        $targetUrl = $_SESSION['redirect_after_login'] ?? '/account';
+        unset($_SESSION['redirect_after_login']);
+
+        if (!is_string($targetUrl) || $targetUrl === '' || $targetUrl[0] !== '/' || str_starts_with($targetUrl, '//')) {
+            return '/account';
+        }
+
+        return $targetUrl;
+    }
+
+    private function completeLogin(array $user): void
+    {
+        session_regenerate_id(true);
+        $_SESSION['user'] = [
+            'id' => (int) $user['id'],
+            'username' => (string) $user['username'],
+        ];
+    }
+
+    private function issueRememberMeCookie(int $userId): void
+    {
+        $userToken = UserTokenModel::createUserToken($userId);
+        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+
+        $ok = setcookie('remember_me', $userToken, [
+            'expires'  => time() + 60 * 60 * 24,
+            'path'     => '/',
+            'secure'   => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+
+        if (!$ok) {
+            throw new RuntimeException('Failed to send rememberme cookie');
+        }
+    }
+
+    private function clearRememberMeCookie(): void
+    {
+        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+        setcookie('remember_me', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
     }
 
     private function validateFormLogin(array $data): void
@@ -186,8 +284,7 @@ class User extends \Core\Controller
         session_destroy();
 
         header ("Location: /");
-
-        return true;
+        exit;
     }
 
 }
