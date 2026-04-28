@@ -4,6 +4,8 @@ namespace Core;
 
 use ErrorException;
 use Exception;
+use LogicException;
+use Throwable;
 
 /**
  * Error and exception handler
@@ -22,12 +24,11 @@ class Error
      * @param int $line Line number in the file
      *
      * @return void
-     * @throws ErrorException
      */
-    public static function errorHandler($level, $message, $file, $line)
+    public static function errorHandler(int $level, string $message, string $file, int $line): void
     {
         if (error_reporting() !== 0) {  // to keep the @ operator working
-            throw new ErrorException($message, 0, $level, $file, $line);
+            throw new LogicException($message, 0, $level, $file, $line);
         }
     }
 
@@ -38,7 +39,7 @@ class Error
      *
      * @return void
      */
-    public static function exceptionHandler($exception)
+    public static function exceptionHandler(Throwable $exception): void
     {
         $code = $exception->getCode();
         if ($code !== 404) {
@@ -70,7 +71,7 @@ class Error
     /**
      * @return bool
      */
-    private static function showErrors()
+    private static function showErrors(): bool
     {
         $value = getenv('SHOW_ERRORS');
 
@@ -78,12 +79,12 @@ class Error
             $value = $_ENV['SHOW_ERRORS'];
         }
 
-        if ($value === false || $value === '' || $value === null) {
+        if ($value === false || $value === '') {
             return true;
         }
 
         $parsed = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
-        return $parsed === null ? true : $parsed;
+        return $parsed ?? true;
     }
 }
