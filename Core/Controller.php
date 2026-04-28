@@ -41,10 +41,10 @@ abstract class Controller
         $method = $name . 'Action';
 
         if (method_exists($this, $method)) {
-            if ($this->before() !== false) {
+//            if ($this->before() !== false) {
                 call_user_func_array([$this, $method], $args);
-                $this->after();
-            }
+//                $this->after();
+//            }
         } else {
             throw new RuntimeException("Method $method not found in controller " . get_class($this));
         }
