@@ -11,6 +11,7 @@ use Core\Controller;
 use Core\View;
 use Exception;
 use InvalidArgumentException;
+use Random\RandomException;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validation;
 
@@ -192,7 +193,11 @@ class Product extends Controller
     private function getCsrfToken(): string
     {
         if (!isset($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            try {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            } catch (RandomException $e) {
+                throw new Exception('Une erreur est survenue lors de la generation du token');
+            }
         }
 
         return $_SESSION['csrf_token'];
