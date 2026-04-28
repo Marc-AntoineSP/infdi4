@@ -32,7 +32,7 @@ class Articles extends Model {
             case 'date':
                 $query .= ' ORDER BY articles.published_date DESC';
                 break;
-            case '':
+            default:
                 break;
         }
 
@@ -53,7 +53,7 @@ class Articles extends Model {
         $stmt = $db->prepare('
             SELECT * FROM articles
             INNER JOIN users ON articles.user_id = users.id
-            WHERE articles.id = ? 
+            WHERE articles.id = ?
             LIMIT 1');
 
         $stmt->execute([$id]);
@@ -71,7 +71,7 @@ class Articles extends Model {
         $db = static::getDB();
 
         $stmt = $db->prepare('
-            UPDATE articles 
+            UPDATE articles
             SET articles.views = articles.views + 1
             WHERE articles.id = ?');
 
