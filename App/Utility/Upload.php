@@ -15,7 +15,7 @@ class Upload
      * @throws UnexpectedValueException
      * @throws UploadMoveFailedException
      */
-    public static function uploadFile(array $file, $fileName): string
+    public static function uploadFile(array $file, int|string $fileName): string
     {
         $currentDirectory = getcwd();
         $uploadDirectory = "/storage/";
@@ -34,7 +34,7 @@ class Upload
 
         $uploadPath = $currentDirectory . $uploadDirectory . $pictureName;
 
-        if (!in_array($fileExtension, $fileExtensionsAllowed)) {
+        if (!in_array($fileExtension, $fileExtensionsAllowed, true)) {
             throw new UnexpectedValueException("This file extension is not allowed. Please upload a JPEG or PNG file");
         }
 
