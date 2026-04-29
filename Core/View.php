@@ -49,12 +49,8 @@ class View
 
         try {
             echo $twig->render($template, self::setDefaultVariables($args));
-        } catch (LoaderError $e) {
-            throw new RuntimeException($e->getMessage());
-        } catch (RuntimeError $e) {
-            throw new RuntimeException($e->getMessage());
-        } catch (SyntaxError $e) {
-            throw new RuntimeException($e->getMessage());
+        } catch (LoaderError|RuntimeError|SyntaxError $e) {
+            throw new RenderException($e->getMessage());
         }
     }
 
