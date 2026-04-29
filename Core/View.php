@@ -8,7 +8,6 @@ use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Extension\DebugExtension;
 use Twig\Loader\FilesystemLoader;
-use RuntimeException;
 
 /**
  * View
@@ -37,7 +36,7 @@ class View
      *
      * @return void
      */
-    public static function renderTemplate($template, $args = [])
+    public static function renderTemplate(string $template, array $args = []): void
     {
         static $twig = null;
 
@@ -59,9 +58,10 @@ class View
      * @param array $args
      * @return array
      */
-    public static function setDefaultVariables($args = []){
+    public static function setDefaultVariables(array $args = []): array
+    {
 
-        $args["user"] = isset($_SESSION['user']) ? $_SESSION['user'] : null;
+        $args["user"] = $_SESSION['user'] ?? null;
 
         return $args;
     }
